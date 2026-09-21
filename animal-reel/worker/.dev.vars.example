@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit the real file.
+# In production these are secrets: wrangler secret put <NAME>
+GEMINI_API_KEY=
+PEXELS_API_KEY=
+PIXABAY_API_KEY=
+# Optional shared secret. Set the same value in the app's Settings screen.
+APP_TOKEN=

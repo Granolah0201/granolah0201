@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    /* Keep content clear of the notch and the home indicator. */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  }
+
+  /* iOS zooms the page when a font under 16px gets focus. */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-ink-700/70 bg-ink-800/80 backdrop-blur;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold transition active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-ink-950 shadow-lg shadow-accent/20;
+  }
+
+  .btn-ghost {
+    @apply btn border border-ink-600 bg-ink-800 text-slate-200;
+  }
+
+  .btn-quiet {
+    @apply btn bg-ink-700/70 text-slate-200;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-ink-600 bg-ink-900 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-accent focus:outline-none;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400;
+  }
+
+  .chip {
+    @apply rounded-full border border-ink-600 px-3 py-1 text-xs text-slate-300;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
