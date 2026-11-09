@@ -1,0 +1,52 @@
+//@version=6
+// RSI(2) Pullback (Connors)
+// Trend filter: close above the 200-day SMA.
+// Entry: RSI(2) closes below 10 -> buy at the close.
+// Exit: first close above the 5-day SMA -> sell at the close. No stop, no target.
+// Use on daily charts of index ETFs (SPY, QQQ, IWM).
+indicator("RSI(2) Pullback (Connors)", overlay = true, max_labels_count = 500)
+
+rsiLen   = input.int(2, "RSI length", minval = 1)
+buyLevel = input.float(10, "Buy when RSI(2) closes below", minval = 1, maxval = 50)
+trendLen = input.int(200, "Trend SMA length", minval = 10)
+exitLen  = input.int(5, "Exit SMA length", minval = 2)
+
+r      = ta.rsi(close, rsiLen)
+trend  = ta.sma(close, trendLen)
+exitMa = ta.sma(close, exitLen)
+
+plot(trend, "200-day SMA", color = color.new(color.orange, 0), linewidth = 2)
+plot(exitMa, "5-day SMA", color = color.new(color.blue, 0), linewidth = 1)
+
+var bool  inTrade    = false
+var float entryPrice = na
+var int   entryBar   = na
+
+buySignal  = not inTrade and close > trend and r < buyLevel
+sellSignal = inTrade and close > exitMa
+
+if buySignal
+    label.new(bar_index, low, "BUY\nRSI " + str.tostring(r, "#.0"), style = label.style_label_up, color = color.teal, textcolor = color.white, size = size.small)
+    inTrade    := true
+    entryPrice := close
+    entryBar   := bar_index
+else if sellSignal
+    pct = (close / entryPrice - 1) * 100
+    label.new(bar_index, high, "SELL\n" + str.tostring(pct, "+#.##;-#.##") + "% · " + str.tostring(bar_index - entryBar) + "d", style = label.style_label_down, color = pct >= 0 ? color.green : color.red, textcolor = color.white, size = size.small)
+    inTrade    := false
+    entryPrice := na
+    entryBar   := na
+
+var table panel = table.new(position.top_right, 2, 3, bgcolor = color.new(color.black, 15), border_width = 1, border_color = color.new(color.gray, 60))
+if barstate.islast
+    trendUp = close > trend
+    table.cell(panel, 0, 0, "Trend", text_color = color.white, text_size = size.small)
+    table.cell(panel, 1, 0, trendUp ? "UP (above 200)" : "DOWN (below 200)", text_color = trendUp ? color.lime : color.red, text_size = size.small)
+    table.cell(panel, 0, 1, "RSI(2)", text_color = color.white, text_size = size.small)
+    table.cell(panel, 1, 1, str.tostring(r, "#.0"), text_color = r < buyLevel ? color.lime : color.white, text_size = size.small)
+    table.cell(panel, 0, 2, "Status", text_color = color.white, text_size = size.small)
+    statusText = inTrade ? "IN TRADE " + str.tostring((close / entryPrice - 1) * 100, "+#.##;-#.##") + "% · " + str.tostring(bar_index - entryBar) + "d" : "FLAT"
+    table.cell(panel, 1, 2, statusText, text_color = inTrade ? color.yellow : color.silver, text_size = size.small)
+
+alertcondition(buySignal, "RSI(2) pullback buy", "{{ticker}}: RSI(2) pullback BUY near {{close}}")
+alertcondition(sellSignal, "RSI(2) pullback sell", "{{ticker}}: RSI(2) pullback SELL near {{close}}")
